@@ -1,6 +1,8 @@
 const EMOTIONS = ['angry', 'happy', 'sad', 'shy', 'surprise'];
 
-// Build a shuffled deck of 20 cards (each emotion x4 = 10 pairs)
+// Deck is generated ONCE on page load and reused for all restarts/mode switches
+let FIXED_DECK = null;
+
 function buildDeck() {
   const deck = [];
   EMOTIONS.forEach(e => {
@@ -89,6 +91,7 @@ let matchedPairs = 0;
 let moves = 0;
 let locked = false;
 let colorMode = false;
+let allRevealed = false;
 
 const EMOTION_CLASS = {
   happy:    'happy',
@@ -100,9 +103,10 @@ const EMOTION_CLASS = {
 
 // ── Render ─────────────────────────────────────────
 function renderCards() {
+  if (!FIXED_DECK) FIXED_DECK = buildDeck(); // generate only once per page load
   const grid = document.getElementById('card-grid');
   grid.innerHTML = '';
-  buildDeck().forEach((emotion, idx) => {
+  FIXED_DECK.forEach((emotion, idx) => {
     const card = document.createElement('div');
     card.className = 'card';
     card.dataset.emotion = emotion;
@@ -123,7 +127,7 @@ function renderCards() {
 // ── Click handler ──────────────────────────────────
 function onCardClick(e) {
   const card = e.currentTarget;
-  if (locked) return;
+  if (locked || allRevealed) return;
   if (card.classList.contains('flipped')) return;
   if (card.classList.contains('matched')) return;
 
@@ -167,24 +171,59 @@ function showWin() {
   document.getElementById('win-modal').classList.remove('hidden');
 }
 
-// ── Reset ──────────────────────────────────────────
+// ── Reset (keeps same card positions) ─────────────
 function resetGame() {
   playRestart();
   flipped = [];
   matchedPairs = 0;
   moves = 0;
   locked = false;
+  allRevealed = false;
   document.getElementById('move-count').textContent = 0;
   document.getElementById('win-modal').classList.add('hidden');
+  document.getElementById('flip-all-btn').textContent = '👁️ 모두 보기';
   renderCards();
 }
 
-document.getElementById('restart-btn').addEventListener('click', resetGame);
-document.getElementById('play-again-btn').addEventListener('click', resetGame);
+// ── Flip all (color mode only) ─────────────────────
+document.getElementById('flip-all-btn').addEventListener('click', () => {
+  allRevealed = !allRevealed;
+  const cards = document.querySelectorAll('.card:not(.matched)');
+  cards.forEach(card => {
+    if (allRevealed) {
+      card.classList.add('flipped');
+    } else {
+      card.classList.remove('flipped');
+    }
+  });
+  flipped = [];
+  locked = false;
+  document.getElementById('flip-all-btn').textContent = allRevealed ? '🙈 모두 숨기기' : '👁️ 모두 보기';
+});
+
+// ── Mode toggle (updates back colors in place, preserves matched state) ────
 document.getElementById('mode-btn').addEventListener('click', () => {
   colorMode = !colorMode;
   document.getElementById('mode-btn').textContent = colorMode ? '🟠 기본 모드' : '🎨 색깔 모드';
-  resetGame();
+  const flipBtn = document.getElementById('flip-all-btn');
+  flipBtn.textContent = '👁️ 모두 보기';
+  colorMode ? flipBtn.classList.remove('hidden') : flipBtn.classList.add('hidden');
+
+  // Update back colors in place — matched cards are untouched
+  document.querySelectorAll('.card').forEach(card => {
+    const back = card.querySelector('.card-back');
+    back.classList.remove('happy', 'sad', 'angry', 'shy', 'surprise');
+    if (colorMode) back.classList.add(EMOTION_CLASS[card.dataset.emotion]);
+  });
+
+  // Cancel any in-progress flip pair but leave matched cards alone
+  flipped.forEach(card => card.classList.remove('flipped'));
+  flipped = [];
+  locked = false;
+  allRevealed = false;
 });
+
+document.getElementById('restart-btn').addEventListener('click', resetGame);
+document.getElementById('play-again-btn').addEventListener('click', resetGame);
 
 renderCards();
