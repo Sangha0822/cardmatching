@@ -88,6 +88,15 @@ let flipped = [];
 let matchedPairs = 0;
 let moves = 0;
 let locked = false;
+let colorMode = false;
+
+const EMOTION_CLASS = {
+  happy:    'happy',
+  sad:      'sad',
+  angry:    'angry',
+  shy:      'shy',
+  surprise: 'surprise'
+};
 
 // ── Render ─────────────────────────────────────────
 function renderCards() {
@@ -98,12 +107,13 @@ function renderCards() {
     card.className = 'card';
     card.dataset.emotion = emotion;
     card.dataset.idx = idx;
+    const backClass = colorMode ? EMOTION_CLASS[emotion] : '';
     card.innerHTML = `
       <div class="card-inner">
         <div class="card-front">
           <img src="emotions/${emotion}.jpg" alt="${emotion}" draggable="false">
         </div>
-        <div class="card-back">?</div>
+        <div class="card-back ${backClass}">?</div>
       </div>`;
     card.addEventListener('click', onCardClick);
     grid.appendChild(card);
@@ -171,5 +181,10 @@ function resetGame() {
 
 document.getElementById('restart-btn').addEventListener('click', resetGame);
 document.getElementById('play-again-btn').addEventListener('click', resetGame);
+document.getElementById('mode-btn').addEventListener('click', () => {
+  colorMode = !colorMode;
+  document.getElementById('mode-btn').textContent = colorMode ? '🟠 기본 모드' : '🎨 색깔 모드';
+  resetGame();
+});
 
 renderCards();

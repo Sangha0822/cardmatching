@@ -43,6 +43,23 @@ header h1 {
   color: #333333;
 }
 
+#mode-btn {
+  padding: 0.5em 1.2em;
+  font-size: clamp(0.8rem, 1.6vw, 1.1rem);
+  background: #7c3aed;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+#mode-btn:hover,
+#mode-btn:active {
+  background: #6d28d9;
+}
+
 #restart-btn {
   padding: 0.5em 1.2em;
   font-size: clamp(0.8rem, 1.6vw, 1.1rem);
@@ -86,7 +103,7 @@ main {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.45s ease;
+  transition: transform 1s ease;
   border-radius: 12px;
 }
 
@@ -130,6 +147,13 @@ main {
   border: 3px solid #c2410c;
   user-select: none;
 }
+
+/* Colored back mode */
+.card-back.happy    { background: #facc15; border-color: #eab308; color: #fff; }
+.card-back.sad      { background: #3b82f6; border-color: #2563eb; color: #fff; }
+.card-back.angry    { background: #ef4444; border-color: #dc2626; color: #fff; }
+.card-back.shy      { background: #f472b6; border-color: #ec4899; color: #fff; }
+.card-back.surprise { background: #22c55e; border-color: #16a34a; color: #fff; }
 
 /* Matched cards stay visible and get a green glow */
 .card.matched .card-inner {
